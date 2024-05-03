@@ -1,15 +1,7 @@
 #include "proc.hpp"
 
 Processor::Processor ()  : 
-    regs(REG_SIZE, 0), code(NULL), ram(new double[RAM_SIZE]) {
-
-        for (int i = 0; i < STACK_CAPACITY; i++){
-
-            stk.push(0);
-            if (i < CALL_STACK_CAPACITY) 
-                call_stk.push(0);
-        }
-    }
+    regs(REG_SIZE, 0), code(NULL), ram(new double[RAM_SIZE]) {}
 
 Processor::~Processor () {
 
@@ -34,9 +26,16 @@ void    Processor::readCode (const string Fname) {
     input_file.close();
 }
 
-int     Processor::getArg   (int cmd) {
+double  Processor::stkPop   (double* arg) {
+    
+    *arg = stk.top ();
+    stk.pop ();
+    return *arg;
+}
 
-    int arg = 0;
+void    Processor::getArg   (int cmd, double *arg_p) {
+
+    double arg = 0;
 
     if (cmd & static_cast<int> (Masks::MASK_REG)) {
 
@@ -51,6 +50,29 @@ int     Processor::getArg   (int cmd) {
         arg = ram[arg];
 
     *arg_p = arg;
+}
+
+void    Processor::runCpu       () {
+
+    while (ip < code_size) {
+
+        char cmd = code[ip++];
+
+#define DEF_CMD(name, num, arg, code)  \
+    case CMD_##name:                   \
+        getArg (cmd, &arg);            \
+        code;                          \
+        break;                         
+
+        switch (cmd & CMD) {
+
+            #include "cmd.hpp"
+
+        default:
+
+            cerr << "Cmd error" << endl;
+        }
+    }
 }
 
 size_t getfileSize (const string file_name) {

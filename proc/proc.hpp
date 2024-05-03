@@ -25,6 +25,16 @@ enum class Masks {
     MASK_IMM = 1<<5,
 };
 
+enum STACKERRORS
+{
+    ACCESS_ERROR = 1<<0,
+    SIZE_ERROR   = 1<<1,
+    INFO_ERROR   = 1<<2,
+    DATA_ERROR   = 1<<3,
+    STRUCT_ERROR = 1<<4,
+    STATUS_ERROR = 1<<5,
+};
+
 const size_t STACK_CAPACITY = 16;
 const size_t CALL_STACK_CAPACITY = 8;
 
@@ -39,9 +49,11 @@ public:
 
     Processor ();
 
-    void readCode   (const string inptu_file);
+    void    readCode    (const string inptut_file);
+    void    getArg      (int cmd, double* arg_p);
+    void    runCpu      ();
 
-    int getArg     (int cmd);
+    double  stkPop      (double *arg);
 
     ~Processor ();
 
