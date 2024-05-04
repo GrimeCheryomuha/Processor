@@ -25,14 +25,17 @@ enum class Masks {
     MASK_IMM = 1<<5,
 };
 
-enum STACKERRORS
-{
-    ACCESS_ERROR = 1<<0,
-    SIZE_ERROR   = 1<<1,
-    INFO_ERROR   = 1<<2,
-    DATA_ERROR   = 1<<3,
-    STRUCT_ERROR = 1<<4,
-    STATUS_ERROR = 1<<5,
+enum class Errors {
+
+    OK                  = 0,
+    WRONG_OPEN_FILE     = 1,
+    STACK_OVERFLOW      = 2,
+    WRONG_RAM_ADRESS    = 3,
+    WRONG_REG           = 4,
+    EMPTY_STACK         = 5,
+    EMTY_CALL_STACK     = 6,
+    NO_FILE             = 7,
+    NULL_PTR_ARG        = 8
 };
 
 const size_t STACK_CAPACITY = 16;
@@ -53,6 +56,8 @@ public:
     void    getArg      (int cmd, double* arg_p);
     void    runCpu      ();
 
+    size_t getfileSize (const string file_name);
+
     double  stkPop      (double *arg);
 
     ~Processor ();
@@ -65,10 +70,12 @@ private:
     stack<double> stk;
     stack<double> call_stk;
 
-    vector<double> regs;
+    vector <double> regs;
     char* code;
+
+    vector <int> errors;
 
     double *ram;
 };
 
-size_t getfileSize (const string file_name);
+
