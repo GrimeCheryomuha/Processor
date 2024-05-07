@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.asm": "asm-intel-x86-generic",
+        "string": "cpp",
+        "format": "cpp",
+        "vector": "cpp",
+        "ostream": "cpp",
+        "fstream": "cpp"
+    }
+}

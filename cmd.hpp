@@ -1,4 +1,8 @@
-DEF_CMD (push, 1, 1,
+#define FROM_ARG 1
+#define TO_ARG 2
+#define IP_ARG 3
+
+DEF_CMD (push, 1, FROM_ARG,
 {
     double arg = 0;
     getArg (cmd, &arg);
@@ -9,7 +13,7 @@ DEF_CMD (push, 1, 1,
         return;
 })
 
-DEF_CMD (pop, 2, 1, 
+DEF_CMD (pop, 2, TO_ARG, 
 {
     double arg = 0;
     getArg (cmp, &arg);
@@ -52,3 +56,7 @@ DEF_CMD (out, 8, 0,
     double x;
     cout << stkPop(&x) << endl;
 })
+
+#undef FROM_ARG
+#undef TO_ARG
+#undef IP_ARG
