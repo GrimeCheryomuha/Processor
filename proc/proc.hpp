@@ -43,7 +43,7 @@ const size_t CALL_STACK_CAPACITY = 8;
 
 const int CODE_SHIFT = 4;
 
-const int REG_SIZE = 5; 
+const int REG_SIZE = 5;
 const int RAM_SIZE = 121;
 
 class Processor {
@@ -56,7 +56,7 @@ public:
     void    getArg      (int cmd, double* arg_p);
     void    runCpu      ();
 
-    size_t getfileSize (const string file_name);
+    size_t getfileSize  (const string file_name);
 
     double  stkPop      (double *arg);
 
@@ -67,10 +67,10 @@ private:
     int ip = 0;
     int code_size = 0;
 
-    stack<double> stk;
-    stack<double> call_stk;
+    stack<int> stk;
+    stack<int> call_stk;
 
-    vector <double> regs;
+    vector <int> regs;
     char* code;
 
     vector <int> errors;
