@@ -1,3 +1,5 @@
+#define DEF_CMD(name, num, arg, code);
+
 DEF_CMD (push, 1, 1,
 {
     double arg = 0;
