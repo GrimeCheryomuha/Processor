@@ -1,6 +1,6 @@
 #include "proc.hpp"
 
-Processor::Processor ()  : 
+Processor::Processor ()  :
     regs(REG_SIZE, 0), code(NULL), ram(new double[RAM_SIZE]), errors(8, 0) {}
 
 Processor::~Processor () {
@@ -9,7 +9,7 @@ Processor::~Processor () {
 }
 
 void    Processor::readCode (const string Fname) {
-    
+
     if (Fname.length() == 0) {
 
         errors[static_cast<int> (Errors::NO_FILE)] += 1;
@@ -24,7 +24,7 @@ void    Processor::readCode (const string Fname) {
         return;
     }
 
-    size_t filesize = getfileSize (Fname);    
+    size_t filesize = getfileSize (Fname);
 
     code_size = static_cast<int> (filesize / sizeof(Processor) - CODE_SHIFT);
 
@@ -43,7 +43,7 @@ double  Processor::stkPop   (double* arg) {
         errors[static_cast<int> (Errors::NULL_PTR_ARG)] += 1;
         return 0;
     }
-    
+
     *arg = stk.top ();
     stk.pop ();
     return *arg;
@@ -56,7 +56,7 @@ void    Processor::getArg   (int cmd, double *arg_p) {
         errors[static_cast<int> (Errors::NULL_PTR_ARG)] += 1;
         return;
     }
-    
+
     int arg = 0;
 
     if (cmd & static_cast<int> (Masks::MASK_REG)) {
@@ -67,12 +67,12 @@ void    Processor::getArg   (int cmd, double *arg_p) {
             errors[static_cast<int> (Errors::WRONG_REG)] += 1;
             return;
         }
-        arg += regs[reg]; 
+        arg += regs[reg];
     }
 
     if (cmd & static_cast<int> (Masks::MASK_IMM))
-        arg += code[ip++]; 
-    
+        arg += code[ip++];
+
     if (cmd & static_cast<int> (Masks::MASK_RAM)) {
 
         if (arg >= RAM_SIZE) {
@@ -96,7 +96,7 @@ void    Processor::getArg   (int cmd, double *arg_p) {
 //     case CMD_##name:                   \
 //         getArg (cmd, &arg);            \
 //         code;                          \
-//         break;                         
+//         break;
 
 //         switch (cmd & CMD) {
 
@@ -109,7 +109,7 @@ void    Processor::getArg   (int cmd, double *arg_p) {
 //     }
 // }
 
-size_t      Processor::getfileSize (const string file_name) {
+size_t Processor::getfileSize (const string file_name) {
 
     if (file_name.length() <= 0) {
 
@@ -117,7 +117,7 @@ size_t      Processor::getfileSize (const string file_name) {
         return 0;
     }
 
-    ifstream input_file (file_name); 
+    ifstream input_file (file_name);
 
     if (!input_file.is_open()) {
 

@@ -43,7 +43,7 @@ const size_t CALL_STACK_CAPACITY = 8;
 
 const int CODE_SHIFT = 4;
 
-const int REG_SIZE = 5; 
+const int REG_SIZE = 5;
 const int RAM_SIZE = 121;
 
 class Processor {
