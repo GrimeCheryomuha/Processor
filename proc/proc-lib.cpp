@@ -1,7 +1,7 @@
 #include "proc.hpp"
 
 Processor::Processor ()  :
-    regs(REG_SIZE, 0), code(NULL), ram(new int[RAM_SIZE]), errors(8, 0) {}
+    regs(REG_SIZE, 0), code(NULL), ram(new double[RAM_SIZE]), errors(8, 0) {}
 
 Processor::~Processor () {
 
