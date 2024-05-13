@@ -1,0 +1,9 @@
+push 14
+pop rax
+push rax
+push 2
+mul
+push 2
+add
+pop [rax]
+hlt
