@@ -71,7 +71,7 @@ private:
     stack<int> call_stk;
 
     int regs[REG_SIZE];
-    int regs[REG_SIZE];
+
     char* code;
 
     vector <int> errors;
