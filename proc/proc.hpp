@@ -67,9 +67,10 @@ private:
     int ip = 0;
     int code_size = 0;
 
-    stack<double> stk;
-    stack<double> call_stk;
+    stack<int> stk;
+    stack<int> call_stk;
 
+    int regs[REG_SIZE];
     int regs[REG_SIZE];
     char* code;
 
