@@ -80,6 +80,7 @@ int     Processor::stkCallPop () {
     return arg;
 }
 
+// Здесь вместо указателя можно юзать ссылки ради ржаки
 void    Processor::getArg   (int cmd, int *arg_p) {
 
     if (arg_p == NULL) {
@@ -98,6 +99,7 @@ void    Processor::getArg   (int cmd, int *arg_p) {
 
     if (cmd & static_cast<int> (Masks::MASK_REG)) {
 
+        // !!!!!!!!!!!!!!!!!!! ЕСЛИ КОД У ТЕБЯ ЧАР МАССИВ ТО ТУТ ХУЙНЯ ЗАПИШЕТСЯ (ТОЛЬКО ПЕРВЫЙ БАЙТ ИНТА). ТУТ КАСТ НУЖЕН
         int reg = code[ip++];
         if(reg <= 0 or reg >= REG_SIZE) {
 
@@ -129,16 +131,17 @@ void    Processor::runCpu       () {
 
         int cmd = code[ip++];
 
-#define DEF_CMD(name, num, arg, code)  \
-    case CMD_##name:                   \
-        getArg (cmd, &arg);            \
-        code;                          \
-        break;
-
         switch (cmd & CMD_MASK) {
 
+#define DEF_CMD(name, num, arg, code)  \
+    case CMD_##name:                   \
+        if (arg) getArg (cmd, &arg);   \
+        code                           \
+        break;
+            
             #include "cmd.hpp"
 
+        #undef DEF_CMD
         default:
 
             cerr << "Cmd error" << endl;
