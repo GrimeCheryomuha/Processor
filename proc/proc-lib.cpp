@@ -129,10 +129,9 @@ void    Processor::runCpu       () {
 
         int cmd = code[ip++];
 
-#define DEF_CMD(name, num, arg, code)  \
-    case CMD_##name:                   \
-        getArg (cmd, &arg);            \
-        code;                          \
+#define DEF_CMD(name, num, arg, ...)        \
+    case CMD_##name:                        \
+        __VA_ARGS__;                        \
         break;
 
         switch (cmd & CMD_MASK) {

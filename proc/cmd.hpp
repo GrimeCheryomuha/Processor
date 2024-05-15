@@ -74,7 +74,7 @@ DEF_CMD (name, num, 1, {                                            \
     if (cond) ip = arg;                                             \
 })
 
-DEF_NONARITHM_JMP (JMP, 10, 1)
+DEF_NONARITHM_JMP (jmp, 10, 1)
 
 #define DEF_JMP(name, num, op)                                      \
 DEF_CMD (name, num, 1, {                                            \
