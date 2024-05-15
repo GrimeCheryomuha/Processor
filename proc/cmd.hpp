@@ -1,7 +1,7 @@
 DEF_CMD (push, 1, 1, {
 
     int arg = 0;
-    getArgs (cmd, &arg);
+    getArg (cmd, &arg);
 
     stkPush (arg);
     ERRORCHECK
@@ -10,7 +10,7 @@ DEF_CMD (push, 1, 1, {
 DEF_CMD (pop, 2, 1, {
 
     int arg = 0;
-    getArgs (cmd, &arg);
+    getArg (cmd, &arg);
 
     arg = stkPop ();
     ERRORCHECK
@@ -29,7 +29,7 @@ DEF_CMD (out, 4, 0, {
 
     int arg = 0;
     
-    arg = stk.Pop ();
+    arg = stkPop ();
     ERRORCHECK
 
     cout << arg << endl;
@@ -59,7 +59,24 @@ DEF_CMD (div, 8, 0, {
     ERRORCHECK
 })
 
-#define DEF_JMP(name, num, operator)                                \
+#define DEF_NONARITHM_JMP(name, num, cond)                          \
+DEF_CMD (name, num, 1, {                                            \
+                                                                    \
+    int arg = 0;                                                    \
+    getArg (cmd, &arg);                                             \
+                                                                    \
+    if (arg >= code_size) {                                         \
+                                                                    \
+        errors[static_cast<int> (Errors::WRONG_JMP_IP)] += 1;       \
+        return;                                                     \
+    }                                                               \
+                                                                    \
+    if (cond) ip = arg;                                             \
+})
+
+DEF_NONARITHM_JMP (JMP, 10, 1)
+
+#define DEF_JMP(name, num, op)                                      \
 DEF_CMD (name, num, 1, {                                            \
                                                                     \
     int arg1 = 0, arg2 = 0;                                         \
@@ -74,7 +91,7 @@ DEF_CMD (name, num, 1, {                                            \
     }                                                               \
                                                                     \
     int arg = 0;                                                    \
-    getArgs (cmd, &arg);                                            \
+    getArg (cmd, &arg);                                            \
                                                                     \
     ERRORCHECK                                                      \
     if (arg >= code_size) {                                         \
@@ -86,14 +103,40 @@ DEF_CMD (name, num, 1, {                                            \
     ip = arg;                                                       \
 })                                                                  
 
-DEF_JMP (ja, 9,  >)
+DEF_JMP (ja, 10,  >)
 
-DEF_JMP (jae, 10, >=)
+DEF_JMP (jae, 11, >=)
 
-DEF_JMP (jb , 11,  <)
+DEF_JMP (jb , 12,  <)
 
-DEF_JMP (jbe, 12, <=)
+DEF_JMP (jbe, 13, <=)
 
-DEF_JMP (je, 13, ==)
+DEF_JMP (je, 14, ==)
 
-DEF_JMP (jne, 14, !=)
+DEF_JMP (jne, 15, !=)
+
+DEF_CMD (call, 16, 1, {
+
+    int arg = 0;
+    getArg (cmd, &arg);
+
+    ERRORCHECK
+
+    if (arg > code_size) {
+
+        errors[static_cast<int> (Errors::WRONG_JMP_IP)] += 1;
+        return;
+    }
+
+    stkCallPush (arg);
+    ERRORCHECK
+
+    ip = arg;     
+})
+
+DEF_CMD (ret, 17, 9, {
+
+    ip = stkCallPop ();
+
+    ERRORCHECK 
+})

@@ -33,7 +33,7 @@ enum class Errors {
     WRONG_RAM_ADRESS    =    3,
     WRONG_REG           =    4,
     EMPTY_STACK         =    5,
-    EMTY_CALL_STACK     =    6,
+    EMPTY_CALL_STACK     =    6,
     NO_FILE             =    7,
     NULL_PTR_ARG        =    8,
     NULL_PTR_CODE       =    9,
@@ -42,6 +42,8 @@ enum class Errors {
 
 const size_t STACK_CAPACITY = 16;
 const size_t CALL_STACK_CAPACITY = 8;
+
+const int CMD_MASK = 0x000000FF;
 
 const int CODE_SHIFT = 4;
 
@@ -59,10 +61,12 @@ public:
     void    runCpu          ();
 
     size_t  getfileSize     (const string file_name);
-    bool    thereAreErors   ();
+    bool    thereAreErrors   ();
 
     int     stkPop          ();
+    int     stkCallPop      ();
     void    stkPush         (int arg);
+    void    stkCallPush     (int arg);
 
     ~Processor ();
 

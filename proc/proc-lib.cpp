@@ -5,7 +5,7 @@ Processor::Processor ()  :
 
 Processor::~Processor () {
 
-    delete[] ram;
+    cout << "Destructure" << endl;
 }
 
 void    Processor::readCode (const string Fname) {
@@ -47,16 +47,37 @@ void    Processor::stkPush  (int arg) {
     }
 }
 
-int     Processor::stkPop   () {
+void    Processor::stkCallPush (int arg) {
 
-    if (stk.size() == 0) {
+    call_stk.push(arg);
 
-        errors[static_cast<int> (Errors::EMPTY_STACK)] += 1;
+    if (call_stk.size() > CALL_STACK_CAPACITY) {
+
+        errors[static_cast<int> (Errors::STACK_OVERFLOW)] += 1;
         return;
     }
+}
+
+int     Processor::stkPop   () {
+
+    if (stk.size() == 0)
+        errors[static_cast<int> (Errors::EMPTY_STACK)] += 1;
+
+    int arg = stk.top ();
 
     stk.pop ();
-    return *arg;
+    return arg;
+}
+
+int     Processor::stkCallPop () {
+
+    if (call_stk.size() == 0)
+        errors[static_cast<int> (Errors::EMPTY_CALL_STACK)] += 1;
+
+    int arg = call_stk.top ();
+
+    call_stk.pop ();
+    return arg;
 }
 
 void    Processor::getArg   (int cmd, int *arg_p) {
@@ -114,7 +135,7 @@ void    Processor::runCpu       () {
         code;                          \
         break;
 
-        switch (cmd & CMD) {
+        switch (cmd & CMD_MASK) {
 
             #include "cmd.hpp"
 
@@ -125,7 +146,7 @@ void    Processor::runCpu       () {
     }
 }
 
-bool    Processor::thereAreErors   () {
+bool    Processor::thereAreErrors   () {
 
     for (int i : errors) {
        
