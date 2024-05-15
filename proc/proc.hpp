@@ -27,15 +27,17 @@ enum class Masks {
 
 enum class Errors {
 
-    OK                  = 0,
-    WRONG_OPEN_FILE     = 1,
-    STACK_OVERFLOW      = 2,
-    WRONG_RAM_ADRESS    = 3,
-    WRONG_REG           = 4,
-    EMPTY_STACK         = 5,
-    EMTY_CALL_STACK     = 6,
-    NO_FILE             = 7,
-    NULL_PTR_ARG        = 8
+    OK                  =    0,
+    WRONG_OPEN_FILE     =    1,
+    STACK_OVERFLOW      =    2,
+    WRONG_RAM_ADRESS    =    3,
+    WRONG_REG           =    4,
+    EMPTY_STACK         =    5,
+    EMTY_CALL_STACK     =    6,
+    NO_FILE             =    7,
+    NULL_PTR_ARG        =    8,
+    NULL_PTR_CODE       =    9,
+    WRONG_JMP_IP        =   10,
 };
 
 const size_t STACK_CAPACITY = 16;
@@ -52,13 +54,15 @@ public:
 
     Processor ();
 
-    void    readCode    (const string inptut_file);
-    void    getArg      (int cmd, double* arg_p);
-    void    runCpu      ();
+    void    readCode        (const string inptut_file);
+    void    getArg          (int cmd, int* arg_p);
+    void    runCpu          ();
 
-    size_t getfileSize  (const string file_name);
+    size_t  getfileSize     (const string file_name);
+    bool    thereAreErors   ();
 
-    double  stkPop      (double *arg);
+    int     stkPop          ();
+    void    stkPush         (int arg);
 
     ~Processor ();
 
@@ -79,4 +83,4 @@ private:
     int ram[RAM_SIZE];
 };
 
-
+#define ERRORCHECK if (thereAreErrors()) return;

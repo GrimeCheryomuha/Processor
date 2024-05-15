@@ -58,3 +58,42 @@ DEF_CMD (div, 8, 0, {
     stkPush (stkPop () / stkPop ());
     ERRORCHECK
 })
+
+#define DEF_JMP(name, num, operator)                                \
+DEF_CMD (name, num, 1, {                                            \
+                                                                    \
+    int arg1 = 0, arg2 = 0;                                         \
+    arg1 = stkPop ();                                               \
+    arg2 = stkPop ();                                               \
+                                                                    \
+    ERRORCHECK                                                      \
+    if (!(arg2 op arg1)){                                           \
+                                                                    \
+        ip++;                                                       \
+        break;                                                      \
+    }                                                               \
+                                                                    \
+    int arg = 0;                                                    \
+    getArgs (cmd, &arg);                                            \
+                                                                    \
+    ERRORCHECK                                                      \
+    if (arg >= code_size) {                                         \
+                                                                    \
+        errors[static_cast<int> (Errors::WRONG_JMP_IP)] += 1;       \
+        return;                                                     \
+    }                                                               \
+                                                                    \
+    ip = arg;                                                       \
+})                                                                  
+
+DEF_JMP (ja, 9,  >)
+
+DEF_JMP (jae, 10, >=)
+
+DEF_JMP (jb , 11,  <)
+
+DEF_JMP (jbe, 12, <=)
+
+DEF_JMP (je, 13, ==)
+
+DEF_JMP (jne, 14, !=)

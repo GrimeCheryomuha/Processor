@@ -1,7 +1,7 @@
 #include "proc.hpp"
 
 Processor::Processor ()  :
-    regs(REG_SIZE, 0), code(NULL), ram(new double[RAM_SIZE]), errors(8, 0) {}
+    code(NULL), errors(11, 0) {}
 
 Processor::~Processor () {
 
@@ -36,15 +36,25 @@ void    Processor::readCode (const string Fname) {
     input_file.close();
 }
 
-double  Processor::stkPop   (int* arg) {
+void    Processor::stkPush  (int arg) {
 
-    if (arg == NULL) {
+    stk.push(arg);
 
-        errors[static_cast<int> (Errors::NULL_PTR_ARG)] += 1;
-        return 0;
+    if (stk.size() > STACK_CAPACITY) {
+
+        errors[static_cast<int> (Errors::STACK_OVERFLOW)] += 1;
+        return;
+    }
+}
+
+int     Processor::stkPop   () {
+
+    if (stk.size() == 0) {
+
+        errors[static_cast<int> (Errors::EMPTY_STACK)] += 1;
+        return;
     }
 
-    *arg = stk.top ();
     stk.pop ();
     return *arg;
 }
@@ -54,6 +64,12 @@ void    Processor::getArg   (int cmd, int *arg_p) {
     if (arg_p == NULL) {
 
         errors[static_cast<int> (Errors::NULL_PTR_ARG)] += 1;
+        return;
+    }
+
+    if (code == NULL) {
+
+        errors[static_cast<int> (Errors::NULL_PTR_CODE)] += 1;
         return;
     }
 
@@ -86,28 +102,38 @@ void    Processor::getArg   (int cmd, int *arg_p) {
     *arg_p = arg;
 }
 
-// void    Processor::runCpu       () {
+void    Processor::runCpu       () {
 
-//     while (ip < code_size) {
+    while (ip < code_size) {
 
-//         char cmd = code[ip++];
+        int cmd = code[ip++];
 
-// #define DEF_CMD(name, num, arg, code)  \
-//     case CMD_##name:                   \
-//         getArg (cmd, &arg);            \
-//         code;                          \
-//         break;
+#define DEF_CMD(name, num, arg, code)  \
+    case CMD_##name:                   \
+        getArg (cmd, &arg);            \
+        code;                          \
+        break;
 
-//         switch (cmd & CMD) {
+        switch (cmd & CMD) {
 
-//             #include "cmd.hpp"
+            #include "cmd.hpp"
 
-//         default:
+        default:
 
-//             cerr << "Cmd error" << endl;
-//         }
-//     }
-// }
+            cerr << "Cmd error" << endl;
+        }
+    }
+}
+
+bool    Processor::thereAreErors   () {
+
+    for (int i : errors) {
+       
+        if (i > 0) return 0;
+    }
+
+    return 1;
+}
 
 size_t Processor::getfileSize (const string file_name) {
 
