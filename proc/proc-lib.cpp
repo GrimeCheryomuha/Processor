@@ -28,7 +28,7 @@ void    Processor::readCode (const std::string Fname) {
 
     input_file.unsetf (std::ios::skipws);
 
-    size_t code_size = getfileSize (input_file);
+    code_size = getfileSize (input_file);
 
     code.resize (code_size + 1);
     input_file.read (reinterpret_cast<std::ifstream::char_type*> (&code.front ()), code_size);
@@ -94,6 +94,7 @@ int*    Processor::getArg   (char cmd) {
 
         if (cmd & Masks::MASK_IMM) {
 
+
             int* retVal = ram + *((int*)(code.data () + ip + 1));
             ip += sizeof (int);
             return retVal;
@@ -128,12 +129,13 @@ void    Processor::runCpu       () {
         int arg1 = 0, arg2 = 0;
         int* arg = NULL;
 
-        switch (code[ip] & static_cast<char>(Masks::MASK_CMD)) {
+        switch ((code[ip]) & (static_cast<char>(Masks::MASK_CMD))) {
 
         #define DEF_CMD(name, cmd, has_arg, ...)     \
             case cmd:                                \
-                if (has_arg == 1) getArg (code[ip]); \
-                if (has_arg == 2) getArg (code[ip] | Masks::MASK_IMM); \
+                if (has_arg == 1) arg = getArg (code[ip]); \
+                if (has_arg == 2) arg = getArg (code[ip] | Masks::MASK_IMM); \
+                std::cout << #name "\n";\
                 __VA_ARGS__\
                 break;                              \
 

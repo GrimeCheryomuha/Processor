@@ -1,16 +1,16 @@
 #define COMA ,
-DEF_CMD (hlt, 0, 0, exit (0);)
+DEF_CMD (hlt, 0, 0, {exit (0);})
 
 DEF_CMD (push, 1, 1, {
 
     stkPush (*arg);
-    ERRORCHECK
+    // ERRORCHECK
 })
 
 DEF_CMD (pop, 2, 1, {
 
     *arg = stkPop ();
-    ERRORCHECK
+    // ERRORCHECK
 })
 
 DEF_CMD (in, 3, 0, {
@@ -18,13 +18,13 @@ DEF_CMD (in, 3, 0, {
     std::cin >> tmp;
 
     stkPush(tmp);
-    ERRORCHECK
+    // ERRORCHECK
 })
 
 DEF_CMD (out, 4, 0, {
 
     tmp = stkPop ();
-    ERRORCHECK
+    // ERRORCHECK
 
     std::cout << tmp << std::endl;
 })
@@ -32,25 +32,25 @@ DEF_CMD (out, 4, 0, {
 DEF_CMD (add, 5, 0, {
 
     stkPush (stkPop () + stkPop ());
-    ERRORCHECK
+    // ERRORCHECK
 })
 
 DEF_CMD (sub, 6, 0, {
 
     stkPush (stkPop () - stkPop ());
-    ERRORCHECK
+    // ERRORCHECK
 })
 
 DEF_CMD (mul, 7, 0, {
 
     stkPush (stkPop () * stkPop ());
-    ERRORCHECK
+    // ERRORCHECK
 })
 
 DEF_CMD (div, 8, 0, {
 
     stkPush (stkPop () / stkPop ());
-    ERRORCHECK
+    // ERRORCHECK
 })
 
 DEF_CMD (jmp, 10, 2, {
@@ -60,7 +60,7 @@ DEF_CMD (jmp, 10, 2, {
         errors[static_cast<int> (Errors::WRONG_JMP_IP)] += 1;
         return;
     }
-    ERRORCHECK
+    // ERRORCHECK
 })
 
 /// @warning В ip++ может быть ошибка, надо чекнуть епта
@@ -70,14 +70,14 @@ DEF_CMD (name, num, 2, {                                            \
     arg1 = stkPop ();                                               \
     arg2 = stkPop ();                                               \
                                                                     \
-    ERRORCHECK                                                      \
+    /*ERRORCHECK*/                                                     \
     if (!(arg2 op arg1)){                                           \
                                                                     \
         ip++;                                                       \
         break;                                                      \
     }                                                               \
                                                                     \
-    ERRORCHECK                                                      \
+    /*ERRORCHECK*/                                                      \
     if (*arg >= code_size) {                                         \
                                                                     \
         errors[static_cast<int> (Errors::WRONG_JMP_IP)] += 1;       \
@@ -101,7 +101,7 @@ DEF_JMP (jne, 16, !=)
 
 DEF_CMD (call, 17, 2, {
 
-    ERRORCHECK
+    // ERRORCHECK
 
     if (*arg > code_size) {
 
@@ -110,16 +110,24 @@ DEF_CMD (call, 17, 2, {
     }
 
     stkCallPush (*arg);
-    ERRORCHECK
+    // ERRORCHECK
 
     ip = *arg;
 })
 
-DEF_CMD (ret, 18, 9, {
+DEF_CMD (ret, 18, 2, {
 
     ip = stkCallPop ();
 
-    ERRORCHECK
+    // ERRORCHECK
+})
+
+DEF_CMD (dump, 19, 0, {
+
+    printf ("rax=[%d]\nrbx=[%d]\nrcx=[%d]\nrdx=[%d]\n\n", regs[1], regs[2], regs[3], regs[4]);
+    printf ("ram:\n[");
+    for (int i = 0; i < 121; i++) printf ("%d, ", ram[i]);
+    printf ("lol]\n\nend of dump");
 })
 
 #undef DEF_JMP

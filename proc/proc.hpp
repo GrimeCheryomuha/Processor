@@ -6,6 +6,7 @@
 #include <cmath>
 #include <stack>
 #include <fstream>
+#include <cassert>
 
 #define SIGNATURE "CP01"
 
@@ -27,7 +28,7 @@ public:
         MASK_RAM = 1<<7,
         MASK_REG = 1<<6,
         MASK_IMM = 1<<5,
-        MASK_CMD = 1<<5 - 1
+        MASK_CMD = (1<<5) - 1
     };
 
     enum Errors {

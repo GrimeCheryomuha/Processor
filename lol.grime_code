@@ -1,11 +1,11 @@
 push 14
 push 5555
+push 5555
+dump
 mul
-out
 push 14
 pop rax
-suka:
 pop [rax]
 push 14
-jmp suka
+dump
 hlt
