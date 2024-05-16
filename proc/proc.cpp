@@ -11,5 +11,7 @@ int main (int argc, char *argv[]) {
     cpu.readCode    (file_name);
     cpu.runCpu      ();
 
+    std::cout << "i am going to commit gennocide at mingw headquarters" << std::endl;
+
     return 0;
 }

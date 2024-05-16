@@ -109,7 +109,7 @@ DEF_CMD (call, 17, 2, {
         return;
     }
 
-    stkCallPush (arg);
+    stkCallPush (*arg);
     ERRORCHECK
 
     ip = *arg;

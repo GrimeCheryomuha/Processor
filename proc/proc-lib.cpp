@@ -116,6 +116,8 @@ int*    Processor::getArg   (char cmd) {
         std::cout << "if u are reading this than i have given up at processing this error (error is wrong arg type)" << std::endl;
         exit (__LINE__);
     }
+
+    return NULL;
 }
 
 void    Processor::runCpu       () {

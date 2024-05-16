@@ -1,6 +1,7 @@
 push 14
 push 5555
 mul
+out
 push 14
 pop rax
 suka:
