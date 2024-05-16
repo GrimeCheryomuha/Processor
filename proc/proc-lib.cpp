@@ -1,39 +1,48 @@
 #include "proc.hpp"
 
 Processor::Processor ()  :
-    code(NULL), errors(11, 0) {}
+    ip (0), code_size (0) {}
 
 Processor::~Processor () {
 
-    cout << "Destructure" << endl;
+    std::cout << "likvidirovan\n" << std::endl;
+
 }
 
-void    Processor::readCode (const string Fname) {
+/// @warning May be buggy, experimental solution
+void    Processor::readCode (const std::string Fname) {
 
     if (Fname.length() == 0) {
 
-        errors[static_cast<int> (Errors::NO_FILE)] += 1;
+        errors[Errors::NO_FILE]++;
         return;
     }
 
-    ifstream input_file (Fname);
+    std::ifstream input_file (Fname, std::ios::binary);
 
     if (!input_file.is_open()) {
 
-        errors[static_cast<int> (Errors::WRONG_OPEN_FILE)] += 1;
+        errors[Errors::WRONG_OPEN_FILE]++;
         return;
     }
 
-    size_t filesize = getfileSize (Fname);
+    input_file.unsetf (std::ios::skipws);
 
-    code_size = static_cast<int> (filesize / sizeof(Processor) - CODE_SHIFT);
+    size_t code_size = getfileSize (input_file);
 
-    code = new char[filesize];
+    code.resize (code_size + CODE_SHIFT + 1);
+    input_file.read (reinterpret_cast<std::ifstream::char_type*> (&code.front ()), code_size);
+    code.back () = '\0';
 
-    input_file.read(code, filesize);
-    code += CODE_SHIFT;
+    for (auto i : code) {
+
+        std::ofstream test_file ("kys.test.file", std::ios::binary);
+        test_file << i;
+    }
 
     input_file.close();
+
+    exit (__LINE__);
 }
 
 void    Processor::stkPush  (int arg) {
@@ -131,23 +140,14 @@ void    Processor::runCpu       () {
 
         int cmd = code[ip++];
 
-<<<<<<< HEAD
-#define DEF_CMD(name, num, arg, ...)        \
-    case CMD_##name:                        \
-        __VA_ARGS__;                        \
-        break;
+        switch (cmd & static_cast<int>(Masks::MASK_CMD)) {
 
-=======
->>>>>>> refs/remotes/origin/main
-        switch (cmd & CMD_MASK) {
+        #define DEF_CMD(name, num, has_arg, ...)    \
+            case CMD_ ## name:                        \
+                __VA_ARGS__                         \
+                break;
 
-#define DEF_CMD(name, num, arg, code)  \
-    case CMD_##name:                   \
-        if (arg) getArg (cmd, &arg);   \
-        code                           \
-        break;
-            
-            #include "cmd.hpp"
+        #include "../lib/cmd.hpp"
 
         #undef DEF_CMD
         default:
@@ -160,34 +160,24 @@ void    Processor::runCpu       () {
 bool    Processor::thereAreErrors   () {
 
     for (int i : errors) {
-       
+
         if (i > 0) return 0;
     }
 
     return 1;
 }
 
-size_t Processor::getfileSize (const string file_name) {
-
-    if (file_name.length() <= 0) {
-
-        errors[static_cast<int> (Errors::NO_FILE)] += 1;
-        return 0;
-    }
-
-    ifstream input_file (file_name);
+size_t Processor::getfileSize (std::ifstream& input_file) {
 
     if (!input_file.is_open()) {
 
-        errors[static_cast<int> (Errors::WRONG_OPEN_FILE)] += 1;
+        errors[Errors::WRONG_OPEN_FILE]++;;
         return 0;
     }
 
-    input_file.seekg (0, ios::end);
+    input_file.seekg (0, std::ios::end);
     size_t filesize = input_file.tellg();
-    input_file.seekg (0, ios::beg);
-
-    input_file.close();
+    input_file.seekg (0, std::ios::beg);
 
     return filesize;
 }

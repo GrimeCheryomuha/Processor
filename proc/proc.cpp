@@ -2,8 +2,8 @@
 
 int main (int argc, char *argv[]) {
 
-    string file_name = NULL;
-    
+    string file_name;
+
     if (argc >= 2) file_name = argv[1];
 
     Processor cpu;

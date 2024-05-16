@@ -1,0 +1,10 @@
+push 14
+push 5555
+mul
+push 14
+pop rax
+suka:
+pop [rax]
+push 14
+jmp suka
+hlt

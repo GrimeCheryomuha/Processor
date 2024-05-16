@@ -55,10 +55,10 @@ class Asm {
     ErrorCode   secondPass                  ();
     ErrorCode   writeToFile                 ();
 
-    char        inputFileName[256] = "";
-    char        outputFileName[256] = "";
-    std::vector<std::string> inputBuffer;
-    std::string binOutputBuffer;
+    char                        inputFileName[256] = "";
+    char                        outputFileName[256] = "";
+    std::vector<std::string>    inputBuffer;
+    std::vector<char>           binOutputBuffer;
 
     std::unordered_map<std::string, unsigned int> tagTable;
     std::unordered_map<std::string, std::pair<CmdNum_t, HasArg_t>> cmdTable;
