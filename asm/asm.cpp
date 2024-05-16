@@ -41,7 +41,10 @@ Asm::ErrorCode Asm::writeToFile () {
     outputFile.open (outputFileName);
     outputFile.clear ();
 
-    outputFile << binOutputBuffer;
+    for (auto i : binOutputBuffer) {
+
+        outputFile << i;
+    }
 
     outputFile.close ();
 
@@ -110,8 +113,10 @@ Asm::ErrorCode Asm::parseArg (int index, char& cmdByte) {
         cmdByte |= (char) Masks::MASK_IMM;
 
         int arg = std::stoi (inputBuffer[index]);
-        char argCharArray[] = {*((char*)&arg), *((char*)&arg + 1), *((char*)&arg + 2), *((char*)&arg + 3)};
-        binOutputBuffer.append (argCharArray);
+        binOutputBuffer.push_back (*((char*)&arg + 0));
+        binOutputBuffer.push_back (*((char*)&arg + 1));
+        binOutputBuffer.push_back (*((char*)&arg + 2));
+        binOutputBuffer.push_back (*((char*)&arg + 3));
     }
     else if (inputBuffer[index][0] == 'r' and inputBuffer[index].back () == 'x' and inputBuffer.size () > 2) {
 
@@ -128,8 +133,10 @@ Asm::ErrorCode Asm::parseArg (int index, char& cmdByte) {
             cmdByte |= (char) Masks::MASK_IMM;
 
             int arg = std::stoi (inputBuffer[index]);
-            char argCharArray[] = {*((char*)&arg), *((char*)&arg + 1), *((char*)&arg + 2), *((char*)&arg + 3)};
-            binOutputBuffer.append (argCharArray);
+            binOutputBuffer.push_back (*((char*)&arg + 0));
+            binOutputBuffer.push_back (*((char*)&arg + 1));
+            binOutputBuffer.push_back (*((char*)&arg + 2));
+            binOutputBuffer.push_back (*((char*)&arg + 3));
         }
         else if (inputBuffer[index][1] == 'r' and inputBuffer[index][inputBuffer.size () - 2] == 'x') {
 
@@ -140,15 +147,19 @@ Asm::ErrorCode Asm::parseArg (int index, char& cmdByte) {
     }
     else if (tagTable.count (inputBuffer[index])) {
 
-        int arg = tagTable[inputBuffer[index]];
-        char argCharArray[] = {*((char*)&arg), *((char*)&arg + 1), *((char*)&arg + 2), *((char*)&arg + 3)};
-        binOutputBuffer.append (argCharArray);
+        int arg = std::stoi (inputBuffer[index]);
+        binOutputBuffer.push_back (*((char*)&arg + 0));
+        binOutputBuffer.push_back (*((char*)&arg + 1));
+        binOutputBuffer.push_back (*((char*)&arg + 2));
+        binOutputBuffer.push_back (*((char*)&arg + 3));
     }
     else {
 
         int arg = -1;
-        char argCharArray[] = {*((char*)&arg), *((char*)&arg + 1), *((char*)&arg + 2), *((char*)&arg + 3)};
-        binOutputBuffer.append (argCharArray);
+        binOutputBuffer.push_back (*((char*)&arg + 0));
+        binOutputBuffer.push_back (*((char*)&arg + 1));
+        binOutputBuffer.push_back (*((char*)&arg + 2));
+        binOutputBuffer.push_back (*((char*)&arg + 3));
     }
 
     return ErrorCode::OK;
@@ -157,7 +168,10 @@ Asm::ErrorCode Asm::parseArg (int index, char& cmdByte) {
 Asm::ErrorCode Asm::writeSignatureAndClear () {
 
     try {
-        binOutputBuffer.append (SIGNATURE);
+        binOutputBuffer.push_back (SIGNATURE[0]);
+        binOutputBuffer.push_back (SIGNATURE[1]);
+        binOutputBuffer.push_back (SIGNATURE[2]);
+        binOutputBuffer.push_back (SIGNATURE[3]);
     }
     catch (...) {
 
