@@ -15,22 +15,22 @@ Asm::ErrorCode Asm::assembleBin () {
 
     retVal = bufferizeInput ();
     if (retVal != ErrorCode::OK) return retVal;
-    std::cout << "bufferized\n";
+    // std::cout << "bufferized\n";
 
     retVal = writeSignatureAndClear ();
     if (retVal != ErrorCode::OK) return retVal;
-    std::cout << "written sign\n";
+    // std::cout << "written sign\n";
 
     retVal = firstPass ();
     if (retVal != ErrorCode::OK) return retVal;
-    std::cout << "first pass\n";
+    // std::cout << "first pass\n";
 
     retVal = secondPass ();
     if (retVal != ErrorCode::OK) return retVal;
-    std::cout << "second pass\n";
+    // std::cout << "second pass\n";
 
     retVal = writeToFile ();
-    std::cout << "written to file\n";
+    // std::cout << "written to file\n";
     return retVal;
 }
 
@@ -53,30 +53,38 @@ Asm::ErrorCode Asm::writeToFile () {
 
 Asm::ErrorCode Asm::secondPass () {
 
-    int outputIndex = 4;
-
+    int outputIndex = sizeof (SIGNATURE) - 1;
     for (int i = 0; i < inputBuffer.size (); i++) {
+
+        // std::cout << "Current second pass parameters: outPutIndex = " << outputIndex << "; index = " << i << "; input buffer value = " << inputBuffer[i] << "; output value = ";
+        // printf ("%X;\n", binOutputBuffer[outputIndex]);
+
+        if (tagTable.count (inputBuffer[i])) continue;
 
         if (cmdTable[inputBuffer[i]].second) {
 
             i++;
             outputIndex++;
+
             if (tagTable.count (inputBuffer[i])) {
 
                 int arg = tagTable[inputBuffer[i]];
-                char argCharArray[] = {*((char*)&arg), *((char*)&arg + 1), *((char*)&arg + 2), *((char*)&arg + 3)};
-                binOutputBuffer[outputIndex++] = argCharArray[0];
-                binOutputBuffer[outputIndex++] = argCharArray[1];
-                binOutputBuffer[outputIndex++] = argCharArray[2];
-                binOutputBuffer[outputIndex++] = argCharArray[3];
+                binOutputBuffer[outputIndex + 0] = *((char*)&arg + 0);
+                binOutputBuffer[outputIndex + 1] = *((char*)&arg + 1);
+                binOutputBuffer[outputIndex + 2] = *((char*)&arg + 2);
+                binOutputBuffer[outputIndex + 3] = *((char*)&arg + 3);
             }
-            else outputIndex += 4;
+
+            outputIndex += 3;
         }
+
+        outputIndex++;
     }
 
-    // if (outputIndex != binOutputBuffer.size ()) return ErrorCode::GENERIC_ERROR;
+    if (outputIndex != binOutputBuffer.size ()) return ErrorCode::GENERIC_ERROR;
     return ErrorCode::OK;
 }
+
 
 Asm::ErrorCode Asm::firstPass () {
 
@@ -90,13 +98,14 @@ Asm::ErrorCode Asm::firstPass () {
 
             if (cmdTable[inputBuffer[i]].second == false) continue;
 
-            std::cout << "about to parse some args\n";
+            // std::cout << "about to parse some args\n";
 
             retVal = parseArg (++i, binOutputBuffer.back ());
             if (retVal != ErrorCode::OK) return retVal;
         }
         else if (inputBuffer[i].back () == ':') {
 
+            inputBuffer[i].pop_back ();
             tagTable.emplace (inputBuffer[i], binOutputBuffer.size ());
         }
         else return ErrorCode::UNKNOWN_COMMAND;
@@ -153,7 +162,8 @@ Asm::ErrorCode Asm::parseArg (int index, char& cmdByte) {
     }
     else if (tagTable.count (inputBuffer[index])) {
 
-        int arg = std::stoi (inputBuffer[index]);
+
+        int arg = tagTable[inputBuffer[index]];
         binOutputBuffer.push_back (*((char*)&arg + 0));
         binOutputBuffer.push_back (*((char*)&arg + 1));
         binOutputBuffer.push_back (*((char*)&arg + 2));
