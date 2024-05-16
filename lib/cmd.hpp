@@ -1,5 +1,4 @@
-// Здесь добавь ещё деф цмд для халта. Ничего лучше чем exit (0); я не придумал
-
+DEF_CMD (hlt, 0, 0, {exit (0);})
 
 DEF_CMD (push, 1, 1, {
 
@@ -31,56 +30,51 @@ DEF_CMD (in, 3, 0, {
 DEF_CMD (out, 4, 0, {
 
     int arg = 0;
-    
+
     arg = stkPop ();
     ERRORCHECK
 
-    cout << arg << endl;
+    std::cout << arg << endl;
 })
 
-DEF_CMD (add, 5, 0, { 
-    
+DEF_CMD (add, 5, 0, {
+
     stkPush (stkPop () + stkPop ());
     ERRORCHECK
 })
 
-DEF_CMD (sub, 6, 0, { 
-    
+DEF_CMD (sub, 6, 0, {
+
     stkPush (stkPop () - stkPop ());
     ERRORCHECK
 })
 
-DEF_CMD (mul, 7, 0, { 
-    
+DEF_CMD (mul, 7, 0, {
+
     stkPush (stkPop () * stkPop ());
     ERRORCHECK
 })
 
-DEF_CMD (div, 8, 0, { 
-    
+DEF_CMD (div, 8, 0, {
+
     stkPush (stkPop () / stkPop ());
     ERRORCHECK
 })
 
-// Это все нужно в один дефайн джампа как деф цмд. Либо написать как у меня в проце что пишется все условие а не оператор сравнения, тогда вместо условия можно поставить тру и норм
-        
-#define DEF_NONARITHM_JMP(name, num, cond)                          \
-DEF_CMD (name, num, 1, {                                            \
-                                                                    \
-    int arg = 0;                                                    \
-    getArg (cmd, &arg);                                             \
-                                                                    \
-    if (arg >= code_size) {                                         \
-                                                                    \
-        errors[static_cast<int> (Errors::WRONG_JMP_IP)] += 1;       \
-        return;                                                     \
-    }                                                               \
-                                                                    \
-    if (cond) ip = arg;                                             \
+DEF_CMD (jmp, 10, 1, {
+
+    int arg = 0;
+    getArg (cmd, &arg);
+
+    if (arg >= code_size) {
+
+        errors[static_cast<int> (Errors::WRONG_JMP_IP)] += 1;
+        return;
+    }
+    ERRORCHECK
 })
 
-DEF_NONARITHM_JMP (jmp, 10, 1)
-
+/// @warning В ip++ может быть ошибка, надо чекнуть епта
 #define DEF_JMP(name, num, op)                                      \
 DEF_CMD (name, num, 1, {                                            \
                                                                     \
@@ -96,7 +90,7 @@ DEF_CMD (name, num, 1, {                                            \
     }                                                               \
                                                                     \
     int arg = 0;                                                    \
-    getArg (cmd, &arg);                                            \
+    getArg (cmd, &arg);                                             \
                                                                     \
     ERRORCHECK                                                      \
     if (arg >= code_size) {                                         \
@@ -106,21 +100,21 @@ DEF_CMD (name, num, 1, {                                            \
     }                                                               \
                                                                     \
     ip = arg;                                                       \
-})                                                                  
+})
 
-DEF_JMP (ja, 10,  >)
+DEF_JMP (ja, 11,  >)
 
-DEF_JMP (jae, 11, >=)
+DEF_JMP (jae, 12, >=)
 
-DEF_JMP (jb , 12,  <)
+DEF_JMP (jb , 13,  <)
 
-DEF_JMP (jbe, 13, <=)
+DEF_JMP (jbe, 14, <=)
 
-DEF_JMP (je, 14, ==)
+DEF_JMP (je, 15, ==)
 
-DEF_JMP (jne, 15, !=)
+DEF_JMP (jne, 16, !=)
 
-DEF_CMD (call, 16, 1, {
+DEF_CMD (call, 17, 1, {
 
     int arg = 0;
     getArg (cmd, &arg);
@@ -136,12 +130,14 @@ DEF_CMD (call, 16, 1, {
     stkCallPush (arg);
     ERRORCHECK
 
-    ip = arg;     
+    ip = arg;
 })
 
-DEF_CMD (ret, 17, 9, {
+DEF_CMD (ret, 18, 9, {
 
     ip = stkCallPop ();
 
-    ERRORCHECK 
+    ERRORCHECK
 })
+
+#undef DEF_JMP

@@ -4,7 +4,7 @@ Asm::Asm () {
 
     #define DEF_CMD(name, num, hasArg, ...) cmdTable.emplace (#name, std::pair<CmdNum_t, HasArg_t> (num, hasArg));
 
-    #include "../cmd.hpp"
+    #include "../lib/cmd.hpp"
 
     #undef DEF_CMD
 }

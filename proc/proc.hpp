@@ -72,6 +72,16 @@ public:
 
 private:
 
+    enum def_commands {
+
+        #define DEF_CMD(name, num, arg, ...) \
+            CMD_##name = num,\
+
+        #include "../lib/cmd.hpp"
+
+        #undef DEF_CMD
+    };
+
     int ip = 0;
     int code_size = 0;
 

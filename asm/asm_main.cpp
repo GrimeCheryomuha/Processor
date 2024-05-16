@@ -10,8 +10,8 @@ int main (int argc, char* argv[]) {
 
     errorCode = assembler.assembleBin ();
     if (errorCode != Asm::ErrorCode::OK) {
-        std::cout << "killed in action\n\n" << (int)errorCode;
-        return -1;
+        std::cout << "killed in action\n\n" << (int) errorCode;
+        return (int) errorCode;
     }
 
     return 0;

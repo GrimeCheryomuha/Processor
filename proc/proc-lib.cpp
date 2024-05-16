@@ -5,7 +5,7 @@ Processor::Processor ()  :
 
 Processor::~Processor () {
 
-    cout << "Destructure" << endl;
+    std::cout << "Destructure" << endl;
 }
 
 void    Processor::readCode (const string Fname) {
@@ -131,23 +131,14 @@ void    Processor::runCpu       () {
 
         int cmd = code[ip++];
 
-<<<<<<< HEAD
-#define DEF_CMD(name, num, arg, ...)        \
-    case CMD_##name:                        \
-        __VA_ARGS__;                        \
-        break;
-
-=======
->>>>>>> refs/remotes/origin/main
         switch (cmd & CMD_MASK) {
 
-#define DEF_CMD(name, num, arg, code)  \
-    case CMD_##name:                   \
-        if (arg) getArg (cmd, &arg);   \
-        code                           \
-        break;
-            
-            #include "cmd.hpp"
+        #define DEF_CMD(name, num, has_arg, ...)    \
+            case CMD_ ## name:                        \
+                __VA_ARGS__                         \
+                break;
+
+        #include "../lib/cmd.hpp"
 
         #undef DEF_CMD
         default:
@@ -160,7 +151,7 @@ void    Processor::runCpu       () {
 bool    Processor::thereAreErrors   () {
 
     for (int i : errors) {
-       
+
         if (i > 0) return 0;
     }
 
