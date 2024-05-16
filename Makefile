@@ -72,5 +72,6 @@ $(DEP_DIR):
 clean:
 	rm -rf $(DEP_DIR) $(OBJ_DIR)
 	rm -rf $(ERROR_FILE) asm.out proc.out
+	clear
 
 .PHONY: clean
