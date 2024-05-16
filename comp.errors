@@ -1,0 +1,18 @@
+proc/../lib/cmd.hpp: In member function ‘void Processor::runCpu()’:
+proc/../lib/cmd.hpp:112:18: error: invalid conversion from ‘int*’ to ‘int’ [-fpermissive]
+  112 |     stkCallPush (arg);
+      |                  ^~~
+      |                  |
+      |                  int*
+proc/proc-lib.cpp:135:17: note: in definition of macro ‘DEF_CMD’
+  135 |                 __VA_ARGS__\
+      |                 ^~~~~~~~~~~~
+  136 |                 break;                              \
+      |                  
+proc/proc-lib.cpp:51:37: note:   initializing argument 1 of ‘void Processor::stkCallPush(int)’
+   51 | void    Processor::stkCallPush (int arg) {
+      |                                 ~~~~^~~
+proc/proc-lib.cpp: In member function ‘int* Processor::getArg(char)’:
+proc/proc-lib.cpp:119:1: warning: control reaches end of non-void function [-Wreturn-type]
+  119 | }
+      | ^

@@ -30,19 +30,11 @@ void    Processor::readCode (const std::string Fname) {
 
     size_t code_size = getfileSize (input_file);
 
-    code.resize (code_size + CODE_SHIFT + 1);
+    code.resize (code_size + 1);
     input_file.read (reinterpret_cast<std::ifstream::char_type*> (&code.front ()), code_size);
     code.back () = '\0';
 
-    for (auto i : code) {
-
-        std::ofstream test_file ("kys.test.file", std::ios::binary);
-        test_file << i;
-    }
-
     input_file.close();
-
-    exit (__LINE__);
 }
 
 void    Processor::stkPush  (int arg) {
@@ -89,70 +81,67 @@ int     Processor::stkCallPop () {
     return arg;
 }
 
-// Здесь вместо указателя можно юзать ссылки ради ржаки
-void    Processor::getArg   (int cmd, int *arg_p) {
+int*    Processor::getArg   (char cmd) {
 
-    if (arg_p == NULL) {
+    if (cmd & Masks::MASK_RAM) {
 
-        errors[static_cast<int> (Errors::NULL_PTR_ARG)] += 1;
-        return;
-    }
+        if (cmd & Masks::MASK_REG) {
 
-    if (code == NULL) {
-
-        errors[static_cast<int> (Errors::NULL_PTR_CODE)] += 1;
-        return;
-    }
-
-    int arg = 0;
-
-    if (cmd & static_cast<int> (Masks::MASK_REG)) {
-
-        // !!!!!!!!!!!!!!!!!!! ЕСЛИ КОД У ТЕБЯ ЧАР МАССИВ ТО ТУТ ХУЙНЯ ЗАПИШЕТСЯ (ТОЛЬКО ПЕРВЫЙ БАЙТ ИНТА). ТУТ КАСТ НУЖЕН
-        int reg = code[ip++];
-        if(reg <= 0 or reg >= REG_SIZE) {
-
-            errors[static_cast<int> (Errors::WRONG_REG)] += 1;
-            return;
+            int* retVal = ram + *(regs + *((int*)(code.data () + ip + 1)));
+            ip += sizeof (int);
+            return retVal;
         }
-        arg += regs[reg];
-    }
 
-    if (cmd & static_cast<int> (Masks::MASK_IMM))
-        arg += code[ip++];
+        if (cmd & Masks::MASK_IMM) {
 
-    if (cmd & static_cast<int> (Masks::MASK_RAM)) {
-
-        if (arg >= RAM_SIZE) {
-
-            errors[static_cast<int> (Errors::WRONG_RAM_ADRESS)] += 1;
-            return;
+            int* retVal = ram + *((int*)(code.data () + ip + 1));
+            ip += sizeof (int);
+            return retVal;
         }
-        arg = ram[arg];
     }
+    else if (cmd & Masks::MASK_REG) {
 
-    *arg_p = arg;
+        int* retVal = regs + *((int*)(code.data () + ip + 1));
+        ip += sizeof (int);
+        return retVal;
+    }
+    else if (cmd & Masks::MASK_IMM) {
+
+        int* retVal = (int*)(code.data () + ip + 1);
+        ip += sizeof (int);
+        return retVal;
+    }
+    else {
+
+        std::cout << "if u are reading this than i have given up at processing this error (error is wrong arg type)" << std::endl;
+        exit (__LINE__);
+    }
 }
 
 void    Processor::runCpu       () {
 
-    while (ip < code_size) {
+    for (ip = CODE_SHIFT; ip < code_size; ip++) {
 
-        int cmd = code[ip++];
+        int tmp = 0;
+        int arg1 = 0, arg2 = 0;
+        int* arg = NULL;
 
-        switch (cmd & static_cast<int>(Masks::MASK_CMD)) {
+        switch (code[ip] & static_cast<char>(Masks::MASK_CMD)) {
 
-        #define DEF_CMD(name, num, has_arg, ...)    \
-            case CMD_ ## name:                        \
-                __VA_ARGS__                         \
-                break;
+        #define DEF_CMD(name, cmd, has_arg, ...)     \
+            case cmd:                                \
+                if (has_arg == 1) getArg (code[ip]); \
+                if (has_arg == 2) getArg (code[ip] | Masks::MASK_IMM); \
+                __VA_ARGS__\
+                break;                              \
 
         #include "../lib/cmd.hpp"
 
         #undef DEF_CMD
         default:
 
-            cerr << "Cmd error" << endl;
+            std::cerr << "Cmd error" << std::endl;
+            exit (-1);
         }
     }
 }

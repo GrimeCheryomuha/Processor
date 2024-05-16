@@ -50,7 +50,7 @@ public:
 
     void    readCode        (const std::string input_file_name);
     void    checkSign       ();
-    void    getArg          (int cmd, int* arg_p);
+    int*    getArg          (char cmd);
     void    runCpu          ();
 
     size_t  getfileSize     (std::ifstream& input_file);
