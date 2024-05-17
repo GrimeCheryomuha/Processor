@@ -1,15 +1,18 @@
 #include "proc.hpp"
 
-Processor::Processor ()  :
-    ip (0), code_size (0) {}
+Processor::Processor () : ip (0), code_size (0) {
+
+    for (int i = 0; i < RAM_SIZE; i++) ram[i] = 0;
+    for (int i = 0; i < REG_SIZE; i++) regs[i] = 0;
+}
 
 Processor::~Processor () {
 
-    std::cout << "likvidirovan\n" << std::endl;
+    std::cerr << "\n--------------------\nlikvidirovan\n" << std::endl;
 
 }
 
-/// @warning May be buggy, experimental solution
+/// @warning May be buggy,\ experimental solution
 void    Processor::readCode (const std::string Fname) {
 
     if (Fname.length() == 0) {
@@ -131,20 +134,19 @@ void    Processor::runCpu       () {
 
         switch ((code[ip]) & (static_cast<char>(Masks::MASK_CMD))) {
 
-        #define DEF_CMD(name, cmd, has_arg, ...)     \
-            case cmd:                                \
-                if (has_arg == 1) arg = getArg (code[ip]); \
-                if (has_arg == 2) arg = getArg (code[ip] | Masks::MASK_IMM); \
-                std::cout << #name "\n";\
-                __VA_ARGS__\
-                break;                              \
+        #define DEF_CMD(name, cmd, has_arg, ...)                                \
+            case cmd:                                                           \
+                if (has_arg == 1) arg = getArg (code[ip]);                      \
+                if (has_arg == 2) arg = getArg ((code[ip]) | (Masks::MASK_IMM));\
+                __VA_ARGS__                                                     \
+                break;                                                          \
 
         #include "../lib/cmd.hpp"
 
         #undef DEF_CMD
         default:
 
-            std::cerr << "Cmd error" << std::endl;
+            std::cout << "Cmd error" << std::endl;
             exit (-1);
         }
     }

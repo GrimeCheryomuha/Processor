@@ -7,6 +7,7 @@
 #include <stack>
 #include <fstream>
 #include <cassert>
+#include <chrono>
 
 #define SIGNATURE "CP01"
 
@@ -25,9 +26,9 @@ public:
 
     enum Masks {
 
-        MASK_RAM = 1<<7,
-        MASK_REG = 1<<6,
-        MASK_IMM = 1<<5,
+        MASK_RAM = (1<<7),
+        MASK_REG = (1<<6),
+        MASK_IMM = (1<<5),
         MASK_CMD = (1<<5) - 1
     };
 
