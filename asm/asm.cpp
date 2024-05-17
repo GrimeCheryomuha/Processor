@@ -15,22 +15,17 @@ Asm::ErrorCode Asm::assembleBin () {
 
     retVal = bufferizeInput ();
     if (retVal != ErrorCode::OK) return retVal;
-    // std::cout << "bufferized\n";
 
     retVal = writeSignatureAndClear ();
     if (retVal != ErrorCode::OK) return retVal;
-    // std::cout << "written sign\n";
 
     retVal = firstPass ();
     if (retVal != ErrorCode::OK) return retVal;
-    // std::cout << "first pass\n";
 
     retVal = secondPass ();
     if (retVal != ErrorCode::OK) return retVal;
-    // std::cout << "second pass\n";
 
     retVal = writeToFile ();
-    // std::cout << "written to file\n";
     return retVal;
 }
 
@@ -38,6 +33,7 @@ Asm::ErrorCode Asm::writeToFile () {
 
     std::ofstream outputFile;
 
+    /// open + clear output file
     outputFile.open (outputFileName);
     outputFile.clear ();
 
@@ -56,16 +52,20 @@ Asm::ErrorCode Asm::secondPass () {
     int outputIndex = sizeof (SIGNATURE) - 1;
     for (int i = 0; i < inputBuffer.size (); i++) {
 
+        // uncomment for diagnostics
         // std::cout << "Current second pass parameters: outPutIndex = " << outputIndex << "; index = " << i << "; input buffer value = " << inputBuffer[i] << "; output value = ";
         // printf ("%X;\n", binOutputBuffer[outputIndex]);
 
+        /// skips if encountered tag
         if (tagTable.count (inputBuffer[i])) continue;
 
+        /// if command has arguments
         if (cmdTable[inputBuffer[i]].second) {
 
             i++;
             outputIndex++;
 
+            /// if argument is a tag replace it with jump destination (ip)
             if (tagTable.count (inputBuffer[i])) {
 
                 int arg = tagTable[inputBuffer[i]];
@@ -75,16 +75,15 @@ Asm::ErrorCode Asm::secondPass () {
                 binOutputBuffer[outputIndex + 3] = *((char*)&arg + 3);
             }
 
-            outputIndex += 3;
+            outputIndex += 3;/// +3 because +1 will be later
         }
 
-        outputIndex++;
+        outputIndex++; ///... here
     }
 
-    if (outputIndex != binOutputBuffer.size ()) return ErrorCode::GENERIC_ERROR;
+    if (outputIndex != binOutputBuffer.size ()) return ErrorCode::GENERIC_ERROR; /// justa check that we didn't skip or not read bytes
     return ErrorCode::OK;
 }
-
 
 Asm::ErrorCode Asm::firstPass () {
 
@@ -92,34 +91,35 @@ Asm::ErrorCode Asm::firstPass () {
 
     for (int i = 0; i < inputBuffer.size (); i++) {
 
+        /// if is a command
         if (cmdTable.count (inputBuffer[i]) != 0) {
 
-            binOutputBuffer.push_back (cmdTable[inputBuffer[i]].first);
+            binOutputBuffer.push_back (cmdTable[inputBuffer[i]].first); /// writes command byte
 
-            if (cmdTable[inputBuffer[i]].second == false) continue;
+            if (cmdTable[inputBuffer[i]].second == false) continue; ///skips parseArg if no args
 
-            // std::cout << "about to parse some args\n";
-
-            retVal = parseArg (++i, binOutputBuffer.back ());
+            retVal = parseArg (++i, binOutputBuffer.back ());///parses arg and moves index to argument string
             if (retVal != ErrorCode::OK) return retVal;
         }
-        else if (inputBuffer[i].back () == ':') {
+        else if (inputBuffer[i].back () == ':') { /// if is a tag
 
-            inputBuffer[i].pop_back ();
-            tagTable.emplace (inputBuffer[i], binOutputBuffer.size ());
+            inputBuffer[i].pop_back (); ///removes ':' from the end
+            tagTable.emplace (inputBuffer[i], binOutputBuffer.size ()); ///adds pair of tag name and adress to known tags
         }
-        else return ErrorCode::UNKNOWN_COMMAND;
+        else return ErrorCode::UNKNOWN_COMMAND; /// if not a tag and not a command found
     }
 
     return retVal;
 }
 
-/// @warning may be buggy
 Asm::ErrorCode Asm::parseArg (int index, char& cmdByte) {
 
-    if (inputBuffer[index][0] >= '0' and inputBuffer[index][0] <= '9' or inputBuffer[index][0] == '-') {
+    /// @warning all args are int!
 
-        cmdByte |= (char) Masks::MASK_IMM;
+    /// if arg is a number (better check should be implemented later)
+    if (inputBuffer[index][0] >= '0' and inputBuffer[index][0] <= '9' or inputBuffer[index][0] == '-' or inputBuffer[index][0] == '+') {
+
+        cmdByte |= (char) Masks::MASK_IMM; ///adds bit for immidiate constant argument
 
         int arg = std::stoi (inputBuffer[index]);
         binOutputBuffer.push_back (*((char*)&arg + 0));
@@ -127,20 +127,20 @@ Asm::ErrorCode Asm::parseArg (int index, char& cmdByte) {
         binOutputBuffer.push_back (*((char*)&arg + 2));
         binOutputBuffer.push_back (*((char*)&arg + 3));
     }
-    else if (inputBuffer[index][0] == 'r' and inputBuffer[index].back () == 'x' and inputBuffer.size () > 2) {
+    else if (inputBuffer[index][0] == 'r' and inputBuffer[index].back () == 'x' and inputBuffer.size () > 2) { /// if argument is a register
 
-        cmdByte |= (char) Masks::MASK_REG;
+        cmdByte |= (char) Masks::MASK_REG; /// adds bit for register argument
 
         binOutputBuffer.push_back (inputBuffer[index][1] == '0' ? 0 : inputBuffer[index][1] - 'a' + 1);
         binOutputBuffer.push_back (0);
         binOutputBuffer.push_back (0);
         binOutputBuffer.push_back (0);
     }
-    else if (inputBuffer[index][0] == '[' and inputBuffer[index].back () == ']') {
+    else if (inputBuffer[index][0] == '[' and inputBuffer[index].back () == ']') { /// if argument is ram, than processor uses imm or reg argument as adress in ram
 
-        cmdByte |= (char) Masks::MASK_RAM;
+        cmdByte |= (char) Masks::MASK_RAM; /// adds ram bit
 
-        if (inputBuffer[index][1] >= '0' and inputBuffer[index][1] <= '9' or inputBuffer[index][0] == '-') {
+        if (inputBuffer[index][1] >= '0' and inputBuffer[index][1] <= '9' or inputBuffer[index][0] == '-') { /// same as imm
 
             cmdByte |= (char) Masks::MASK_IMM;
 
@@ -150,7 +150,7 @@ Asm::ErrorCode Asm::parseArg (int index, char& cmdByte) {
             binOutputBuffer.push_back (*((char*)&arg + 2));
             binOutputBuffer.push_back (*((char*)&arg + 3));
         }
-        else if (inputBuffer[index][1] == 'r' and inputBuffer[index][inputBuffer[index].size () - 2] == 'x') {
+        else if (inputBuffer[index][1] == 'r' and inputBuffer[index][inputBuffer[index].size () - 2] == 'x') { /// same as reg
 
             cmdByte |= (char) Masks::MASK_REG;
 
@@ -160,7 +160,7 @@ Asm::ErrorCode Asm::parseArg (int index, char& cmdByte) {
             binOutputBuffer.push_back (0);
         }
     }
-    else if (tagTable.count (inputBuffer[index])) {
+    else if (tagTable.count (inputBuffer[index])) { /// if not ram reg nor imm and found in tag table, then write corresponding adress
 
 
         int arg = tagTable[inputBuffer[index]];
@@ -169,7 +169,7 @@ Asm::ErrorCode Asm::parseArg (int index, char& cmdByte) {
         binOutputBuffer.push_back (*((char*)&arg + 2));
         binOutputBuffer.push_back (*((char*)&arg + 3));
     }
-    else {
+    else { /// if not ram reg nor imm and not found in tag table, then consider it a yet unknown tag (if this tag does not exist than secondPass will fail)
 
         int arg = -1;
         binOutputBuffer.push_back (*((char*)&arg + 0));
@@ -199,10 +199,10 @@ Asm::ErrorCode Asm::writeSignatureAndClear () {
 
 Asm::ErrorCode Asm::bufferizeInput () {
 
-    ErrorCode retVal = checkInputFileExt ();
+    ErrorCode retVal = checkInputFileExt (); /// checks if extension matches
     if (retVal != ErrorCode::OK) return retVal;
 
-    if (inputFileName[0] =='\0') return ErrorCode::BAD_INPUT_FILE;
+    if (inputFileName[0] =='\0') return ErrorCode::BAD_INPUT_FILE; ///if name is non existent
 
     std::ifstream inputFile;
     try {
@@ -214,7 +214,7 @@ Asm::ErrorCode Asm::bufferizeInput () {
         return ErrorCode::BAD_INPUT_FILE;
     }
 
-    char temp[256] = "";
+    char temp[256] = ""; /// temporary var for words
 
     while (inputFile >> temp) inputBuffer.emplace_back (temp);
 

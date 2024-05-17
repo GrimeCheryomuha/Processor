@@ -1,11 +1,15 @@
-push 14
-push 5555
-push 5555
-dump
-mul
-push 14
+push 10
 pop rax
-pop [rax]
-push 14
-dump
+push 1
+pop rbx
+ok:
+push rax
+push 1
+sub
+pop rax
+push rax
+out
+push rax
+push 1
+jae ok
 hlt
